@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Sparkles, Link as LinkIcon, AtSign, FileDown, Copy } from 'lucide-react';
+import { Sparkles, Link as LinkIcon, AtSign, FileDown, Copy, Loader2 } from 'lucide-react';
 
 const extractUrls = (text) => {
   const urlRegex = /(https?:\/\/[\w.-]+(?:\/[\w\-.~:?#@!$&'()*+,;=%]*)?)/gi;
@@ -67,17 +67,28 @@ const buildItemsFromPrompt = (prompt, urls, emails) => {
 
 const exampleSnippet = `Modern SaaS dashboard with dark mode, onboarding flow, and payments.\nAdd refs: https://dribbble.com https://mobbin.com demo@brand.com`;
 
-const PromptComposer = ({ onGenerate }) => {
+const PromptComposer = ({ onGenerate, onProcessingChange }) => {
   // Field starts empty, snippet is shown only as reference below
   const [text, setText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const urls = useMemo(() => extractUrls(text), [text]);
   const emails = useMemo(() => extractEmails(text), [text]);
 
-  const handleGenerate = () => {
-    const palette = buildPaletteFromPrompt(text);
-    const items = buildItemsFromPrompt(text, urls, emails);
-    onGenerate?.({ prompt: text, palette, items });
+  const handleGenerate = async () => {
+    try {
+      setSubmitting(true);
+      onProcessingChange?.(true);
+      // Simulate processing latency to provide UX feedback
+      await new Promise((res) => setTimeout(res, 700));
+
+      const palette = buildPaletteFromPrompt(text);
+      const items = buildItemsFromPrompt(text, urls, emails);
+      onGenerate?.({ prompt: text, palette, items });
+    } finally {
+      setSubmitting(false);
+      onProcessingChange?.(false);
+    }
   };
 
   const downloadBrief = () => {
@@ -134,8 +145,12 @@ const PromptComposer = ({ onGenerate }) => {
             </div>
           </div>
           <div className="w-full max-w-[220px] space-y-3">
-            <button onClick={handleGenerate} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-white hover:bg-black">
-              <Sparkles className="h-4 w-4" /> Generate Prototype
+            <button
+              onClick={handleGenerate}
+              disabled={submitting}
+              className={`inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-white ${submitting ? 'bg-gray-700' : 'bg-gray-900 hover:bg-black'}`}
+            >
+              {submitting ? (<><Loader2 className="h-4 w-4 animate-spin" /> Processing…</>) : (<><Sparkles className="h-4 w-4" /> Generate Prototype</>)}
             </button>
             <button onClick={downloadBrief} className="inline-flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 hover:bg-gray-50">
               <FileDown className="h-4 w-4" /> Download Brief JSON
