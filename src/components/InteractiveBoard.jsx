@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { GripVertical, Copy, Download, Share2, FileDown, Boxes } from 'lucide-react';
+import { GripVertical, Copy, Share2, FileDown, Boxes } from 'lucide-react';
 
 const defaultColors = ['#0f172a', '#111827', '#f97316', '#f59e0b', '#f3f4f6', '#e5e7eb', '#0ea5e9'];
 
@@ -42,10 +42,10 @@ const ColorSwatch = ({ hex, onCopy }) => (
   </button>
 );
 
-const InteractiveBoard = () => {
-  const [palette] = useState(defaultColors);
+const InteractiveBoard = ({ initialPalette, initialItems }) => {
+  const [palette] = useState(initialPalette && initialPalette.length ? initialPalette : defaultColors);
 
-  const items = useMemo(
+  const defaultItems = useMemo(
     () => [
       {
         title: 'Modern SaaS Dashboard',
@@ -66,6 +66,8 @@ const InteractiveBoard = () => {
     []
   );
 
+  const items = initialItems && initialItems.length ? initialItems : defaultItems;
+
   const copy = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -73,7 +75,6 @@ const InteractiveBoard = () => {
   };
 
   const downloadPDF = () => {
-    // Simple print as PDF
     window.print();
   };
 
@@ -142,7 +143,7 @@ const InteractiveBoard = () => {
               <ColorSwatch key={hex} hex={hex} onCopy={copy} />
             ))}
           </div>
-          <p className="text-xs text-gray-500">Dark background with white to orange accents matches the interactive Spline cover for a modern fintech/travel vibe.</p>
+          <p className="text-xs text-gray-500">Palette is generated from your prompt keywords. Adjust as needed.</p>
         </div>
       </div>
     </section>
