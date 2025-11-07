@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import Hero from './components/Hero';
 import References from './components/References';
-import LayoutTemplates from './components/LayoutTemplates';
 import InteractiveBoard from './components/InteractiveBoard';
-import FunctionalDesigns from './components/FunctionalDesigns';
 import PromptComposer from './components/PromptComposer';
 
 function App() {
@@ -14,14 +12,15 @@ function App() {
       <Hero />
       <PromptComposer onGenerate={setGenerated} />
 
-      {/* When user generates, feed results into the InteractiveBoard; otherwise show default sections first */}
       {generated ? (
-        <InteractiveBoard key={JSON.stringify(generated.palette)} initialPalette={generated.palette} initialItems={generated.items} />
+        <InteractiveBoard
+          key={JSON.stringify(generated.palette)}
+          initialPalette={generated.palette}
+          initialItems={generated.items}
+        />
       ) : (
         <>
           <References />
-          <LayoutTemplates />
-          <FunctionalDesigns />
           <InteractiveBoard />
         </>
       )}

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Sparkles, Link as LinkIcon, AtSign, FileDown } from 'lucide-react';
+import { Sparkles, Link as LinkIcon, AtSign, FileDown, Copy } from 'lucide-react';
 
 const extractUrls = (text) => {
   const urlRegex = /(https?:\/\/[\w.-]+(?:\/[\w\-.~:?#@!$&'()*+,;=%]*)?)/gi;
@@ -65,8 +65,11 @@ const buildItemsFromPrompt = (prompt, urls, emails) => {
   return [...fallback, ...urlItems, ...emailItems].slice(0, 8);
 };
 
+const exampleSnippet = `Modern SaaS dashboard with dark mode, onboarding flow, and payments.\nAdd refs: https://dribbble.com https://mobbin.com demo@brand.com`;
+
 const PromptComposer = ({ onGenerate }) => {
-  const [text, setText] = useState('Modern SaaS dashboard with dark mode, onboarding flow, and payments. Add refs: https://dribbble.com https://mobbin.com demo@brand.com');
+  // Field starts empty, snippet is shown only as reference below
+  const [text, setText] = useState('');
 
   const urls = useMemo(() => extractUrls(text), [text]);
   const emails = useMemo(() => extractEmails(text), [text]);
@@ -92,6 +95,14 @@ const PromptComposer = ({ onGenerate }) => {
     URL.revokeObjectURL(url);
   };
 
+  const copySnippet = async () => {
+    try {
+      await navigator.clipboard.writeText(exampleSnippet);
+    } catch (e) {
+      // noop
+    }
+  };
+
   return (
     <section className="mx-auto max-w-6xl px-6 py-10">
       <div className="rounded-2xl border bg-white p-6 shadow-sm">
@@ -103,12 +114,23 @@ const PromptComposer = ({ onGenerate }) => {
               value={text}
               onChange={(e) => setText(e.target.value)}
               rows={4}
-              placeholder="e.g., Minimal portfolio website with case-study pages, pastel palette, and bold hero. Add references as URLs or emails."
+              placeholder="e.g., Minimal portfolio site with case studies, pastel palette, bold hero. Paste refs (URLs/emails) in the same field."
               className="w-full resize-y rounded-lg border bg-white p-3 font-sans text-sm text-gray-900 outline-none ring-offset-2 placeholder:text-gray-400 focus:ring-2 focus:ring-gray-800"
             />
+
             <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-600">
               <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1"><LinkIcon className="h-3 w-3"/> URLs detected: {urls.length}</span>
               <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1"><AtSign className="h-3 w-3"/> Emails detected: {emails.length}</span>
+            </div>
+
+            <div className="mt-4 rounded-lg border bg-gray-50 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-700">Reference snippet (example)</span>
+                <button onClick={copySnippet} className="inline-flex items-center gap-1 rounded-md border bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100">
+                  <Copy className="h-3 w-3" /> Copy
+                </button>
+              </div>
+              <pre className="whitespace-pre-wrap break-words rounded-md bg-white p-2 text-xs text-gray-800">{exampleSnippet}</pre>
             </div>
           </div>
           <div className="w-full max-w-[220px] space-y-3">
